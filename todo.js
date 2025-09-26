@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     const task = input.value.trim();
     if (task) {
+      task.value = '';
+      addTodo(task);
         // TODO: write code to take the `task` and add it to the `list` variable defined at the top
     }
     updateAllCounters();
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Add a todo item to the list
   function addTodo(task) {
+
     // DOM is handled for you:
     const li = document.createElement('li');
     const taskText = document.createElement('span');
@@ -85,12 +88,21 @@ document.addEventListener('DOMContentLoaded', function() {
   function markAsComplete(todoItem) {
     // TODO: Toggle the 'completed' class on todoItem
     // Hit: if (todoItem.classList.contains('completed')) { ... }
+    todoItem.classList.toggle("completed");
+  
   }
 
   // Remove all completed tasks from the list
   function clearCompleted() {
     // TODO: Remove all items with the 'completed' class from the list
     // Hit: Use a loop to check each child of the list constant at the top of the document
+    const completeItems = list.querySelectorAll(".completed");
+    completeItems.forEach(item => {
+      list.removeChild(item);
+    });
+
+    updateClearButton();
+    updateAllCounters();
   }
 
   // Show/hide the clear completed button
@@ -111,18 +123,39 @@ document.addEventListener('DOMContentLoaded', function() {
     // TODO: Count how many todo items are in the list
     // Hint: count the todos using a for each loop and save it in a variable x. Then use the below code to set the todoCount counter
     // Set todoCount.textContent = 'Todos: ' + x;
+    let counter = 0;
+    list.querySelectorAll('li').forEach(item => {
+      counter += 1;
+    });
+    if (counter > 0) {
+      todoCount.textContent = 'Todos: '+ counter;
+    } else {
+      todoCount.textContent = 'Nothing to do? Are you sure?'
+    }
   }
 
   // Count and display the number of completed todos
   function updateCompletedCount() {
     // TODO: Count how many todo items have the 'completed' class
     // Set completedCount.textContent = 'Completed: Y';
+    let completed = 0;
+    list.querySelectorAll('.completed').forEach(item => {
+      completed += 1;
+    });
+    if(completed != 0) {
+      completedCount.textContent = `For satan, allerede ${completed} tasks done!`
+    } else {
+      completedCount.textContent = `Nothing completed yet? Shame on you!`
+    }
+
   }
 
   // Show a message if there are no todos left
   function updateNoTodosMessage() {
     // TODO: If there are no todos, show a message (e.g. 'No todos left!')
     // You can use todoCount.textContent for this, or create a new element
+
+    /* I added an if to updateToDoCount, bloating the code even more is too painful*/
   }
 
   /**
@@ -133,7 +166,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // TODO: Allow editing the todo text
     // Hint: Use an input field and save changes on Enter
     // Use if statements to check for events
-  }
+
+/* Maybe I lack a better understanding of the code 
+    Is there a way to simplify this? */
+
+    const taskText = todoItem.querySelector('.task-text');
+    const prev = taskText.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = prev;
+    input.className = 'edit-input';
+    todoItem.replaceChild(input, taskText);
+    input.focus();
+
+    function save() {
+      const text = input.value.trim();
+      const newTask = text || prev;
+
+      const newToDo = document.createElement('span');
+      newToDo.className = 'task-text';
+      newToDo.textContent = newTask;
+
+      newToDo.addEventListener('click', function() {
+        markAsComplete(todoItem);
+        updateClearButton();
+        updateAllCounters();
+      });
+
+      newToDo.ondblclick = function () {
+        editTodo(todoItem);
+      };
+
+      todoItem.replaceChild(newToDo, input);
+    };
+
+    
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        save();
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      save();
+    });
+    
+   
+    };
+  
 
   /**
    * Toggles all todos as completed or not completed
@@ -141,5 +222,15 @@ document.addEventListener('DOMContentLoaded', function() {
   function toggleAllComplete() {
     // TODO: Use a loop to go through all todo items
     // Use if statements to check and toggle the 'completed' class
+    list.querySelectorAll('li').forEach(item => {
+      if(item.classList.contains('.completed')) {
+        return;
+      } else {
+        item.classList.add('completed');
+      }
+    });
+    
   }
+
+  updateTodoCount();
 });
